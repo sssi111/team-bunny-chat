@@ -1,0 +1,66 @@
+openapi: 3.0.3
+info:
+  title: Team Bunny Chat API
+  version: 1.0.0
+  description: |
+    API для получения истории сообщений чата.
+servers:
+  - url: http://localhost:8080
+paths:
+  /v1/chats/history:
+    get:
+      summary: Получить историю сообщений чата
+      parameters:
+        - name: chat
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Идентификатор чата (название топика)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 500
+          description: Максимальное количество сообщений в ответе
+      responses:
+        '200':
+          description: |
+            История сообщений чата. Если чат не найден, возвращается пустой массив сообщений.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chat_id:
+                    type: string
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+components:
+  schemas:
+    Message:
+      type: object
+      properties:
+        chat_name:
+          type: string
+          description: Название чата (топика)
+        username:
+          type: string
+          description: Имя пользователя
+        body:
+          type: string
+          description: Тело сообщения
+        timestamp:
+          type: string
+          format: date-time
+          description: Время отправки сообщения
+      required:
+        - chat_name
+        - username
+        - body
+        - timestamp 
