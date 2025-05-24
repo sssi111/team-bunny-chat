@@ -1,5 +1,5 @@
-module github.com/team-bunny-chat/client
+module team-bunny-chat/cli
 
-go 1.21
+go 1.23.6
 
-require github.com/rabbitmq/amqp091-go v1.9.0
+require github.com/rabbitmq/amqp091-go v1.10.0

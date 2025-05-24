@@ -10,7 +10,7 @@ import (
 	"strings"
 	"syscall"
 
-	"team-bunny-chat/client"
+	"team-bunny-chat/cli/client"
 )
 
 func main() {
