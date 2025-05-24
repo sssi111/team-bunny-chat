@@ -30,7 +30,7 @@
 
 ```bash
 cd server
-docker-compose up -d    # Запуск RabbitMQ и сервера в Docker
+./run.sh
 ```
 
 Сервер будет доступен по адресу `http://localhost:8080`
@@ -39,14 +39,14 @@ docker-compose up -d    # Запуск RabbitMQ и сервера в Docker
 
 ```bash
 cd gui
-./run.sh               # Запуск графического интерфейса
+./run.sh
 ```
 
 ### Запуск CLI-клиента
 
 ```bash
 cd cli
-go run bin/main.go -user <имя_пользователя> -chat <название_чата>
+go run bin/main.go -user <имя_пользователя> -chat <название_чата> -server <адрес сервера>
 ```
 
 ## Требования
@@ -96,14 +96,9 @@ go run bin/main.go -user <имя_пользователя> -chat <названи
 ## Тестирование
 
 ```bash
-# Тестирование сервера
 cd server && go test ./...
 
-# Тестирование GUI
 cd gui && go test ./...
-
-# Тестирование CLI
-cd cli && go test ./...
 ```
 
 ## Видео
