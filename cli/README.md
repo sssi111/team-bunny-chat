@@ -34,12 +34,12 @@ go run bin/main.go -user <имя_пользователя> -chat <названи
 
 1. Подключение к локальному серверу:
 ```bash
-go run main.go -user Алиса -chat общий
+go run bin/main.go -user Алиса -chat общий
 ```
 
 2. Подключение к удаленному серверу:
 ```bash
-go run main.go -user Алиса -chat общий -rabbitmq chat.example.com:5672 -server chat.example.com:8080
+go run bin/main.go -user Алиса -chat общий -rabbitmq chat.example.com:5672 -server chat.example.com:8080
 ```
 
 ## Интерфейс
