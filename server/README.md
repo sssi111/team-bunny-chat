@@ -1,73 +1,75 @@
-# Chat History Server
+# Сервер чата
 
-Сервер для хранения и получения истории сообщений чатов.
+Серверная часть чата на Go с использованием RabbitMQ и SQLite.
 
-## Описание
+## Компоненты
 
-Сервер подписывается на все топики в RabbitMQ с паттерном "bunny.*" и сохраняет сообщения в SQLite. Для каждого чата создается отдельная таблица. Предоставляет HTTP API для получения истории сообщений.
-
-## API
-
-OpenAPI спецификация находится в файле [`openapi.yaml`](./openapi.yaml).
-
-### Получение истории сообщений
-
-```
-GET /v1/chats/history?chat={chat_name}&limit=50
-```
+- REST API (Gin) для получения истории сообщений
+- RabbitMQ для обмена сообщениями в реальном времени
+- SQLite для хранения истории сообщений
+- Docker и Docker Compose для контейнеризации
 
 ## Запуск
 
-### Предварительные требования
-
-1. Запустите RabbitMQ:
 ```bash
-cd docker/rabbitmq
-docker-compose up -d
+./run.sh
 ```
 
-2. Дождитесь, пока RabbitMQ запустится и создаст сеть `rabbitmq_net`
+Скрипт автоматически:
+- Остановит старые контейнеры
+- Запустит RabbitMQ и сервер в Docker
+- Настроит все необходимые подключения
 
-### Запуск сервера
+## API
 
-```bash
-cd docker/server
-docker-compose up -d
-```
+### REST Endpoints
 
-## Структура проекта
+- `GET /v1/chats/history?chat=ChatName`
+  - Получение истории сообщений чата
+  - Параметры:
+    - `chat` - название чата (обязательный)
+  - Ответ:
+    ```json
+    {
+      "chat": "ChatName",
+      "messages": [
+        {
+          "username": "user1",
+          "body": "message text",
+          "timestamp": "2025-05-24T17:51:22.846648+03:00"
+        }
+      ]
+    }
+    ```
+
+### RabbitMQ
+
+- Topic Exchange для каждого чата
+- Формат сообщения:
+  ```json
+  {
+    "username": "user1",
+    "body": "message text",
+    "timestamp": "2025-05-24T17:51:22.846648+03:00",
+    "chat_name": "ChatName"
+  }
+  ```
+
+### Структура проекта
 
 ```
 .
-├── docker/                # Docker конфигурации
-│   ├── rabbitmq/         # Конфигурация RabbitMQ
-│   │   ├── docker-compose.yml
-│   │   └── README.md
-│   └── server/          # Конфигурация сервера
-│       ├── docker-compose.yml
-│       └── Dockerfile
-├── internal/            # Внутренние пакеты
-│   ├── api/            # HTTP API
-│   ├── models/         # Модели данных
-│   └── rabbitmq/       # Работа с RabbitMQ
-├── openapi.yaml        # Спецификация API
-└── main.go             # Точка входа
+├── internal/           # Внутренняя логика
+│   ├── api/           # REST API handlers
+│   ├── models/        # Модели данных
+│   └── rabbitmq/      # RabbitMQ клиент
+├── Dockerfile         # Сборка образа
+├── docker-compose.yml # Конфигурация контейнеров
+└── run.sh            # Скрипт запуска
 ```
 
-## Переменные окружения
+### Тесты
 
-- `RABBITMQ_URL`: URL для подключения к RabbitMQ (по умолчанию: amqp://guest:guest@rabbitmq:5672/)
-- `PORT`: порт HTTP сервера (по умолчанию: 8080)
-- `SQLITE_DB_PATH`: путь к файлу базы данных SQLite (по умолчанию: /data/chat.db)
-
-## База данных
-
-- Используется SQLite
-- Для каждого чата создается отдельная таблица с именем `chat_{name}`
-- Данные хранятся в Docker volume `chat_data`
-
----
-
-## Лицензия
-
-MIT 
+```bash
+go test ./...
+```
