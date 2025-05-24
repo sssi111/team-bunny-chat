@@ -59,7 +59,7 @@ jobs:
         sudo apt-get install -y xvfb libgl1-mesa-dev xorg-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxxf86vm-dev libxfixes-dev libxrender-dev libx11-dev libxext-dev libxcb1-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-shape0-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-xinerama0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev
 
     - name: Install Go dependencies
-      run: go mod download
+      run: go mod download && go mod tidy
 
     - name: Run tests
       env:
