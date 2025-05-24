@@ -35,7 +35,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  chat_id:
+                  chat:
                     type: string
                   messages:
                     type: array
@@ -63,4 +63,4 @@ components:
         - chat_name
         - username
         - body
-        - timestamp 
+        - timestamp
