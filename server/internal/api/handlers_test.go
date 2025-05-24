@@ -16,7 +16,6 @@ import (
 )
 
 func setupTestDB(t *testing.T) (*Handler, func()) {
-	// Создаем временную базу данных для тестов
 	db, err := sql.Open("sqlite3", "test.db")
 	if err != nil {
 		t.Fatalf("Ошибка создания тестовой БД: %v", err)
@@ -24,7 +23,6 @@ func setupTestDB(t *testing.T) (*Handler, func()) {
 
 	handler := NewHandler(db)
 
-	// Функция очистки
 	cleanup := func() {
 		db.Close()
 		os.Remove("test.db")

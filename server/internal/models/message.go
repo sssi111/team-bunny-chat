@@ -7,20 +7,16 @@ import (
 	"time"
 )
 
-// Message представляет сообщение в чате
 type Message struct {
 	Username  string    `json:"username"`
 	Body      string    `json:"body"`
 	Timestamp time.Time `json:"timestamp"`
 }
 
-// getTableName возвращает имя таблицы для конкретного чата
 func getTableName(chatName string) string {
-	// Заменяем точки на подчеркивания для безопасного имени таблицы
 	return fmt.Sprintf("chat_%s", strings.ReplaceAll(chatName, ".", "_"))
 }
 
-// CreateChatTable создает таблицу для конкретного чата
 func CreateChatTable(db *sql.DB, chatName string) error {
 	tableName := getTableName(chatName)
 	query := fmt.Sprintf(`
@@ -36,9 +32,7 @@ func CreateChatTable(db *sql.DB, chatName string) error {
 	return err
 }
 
-// SaveMessage сохраняет сообщение в соответствующую таблицу чата
 func SaveMessage(db *sql.DB, chatName string, msg *Message) error {
-	// Сначала создаем таблицу, если её нет
 	err := CreateChatTable(db, chatName)
 	if err != nil {
 		return fmt.Errorf("ошибка создания таблицы: %w", err)
@@ -57,18 +51,15 @@ func SaveMessage(db *sql.DB, chatName string, msg *Message) error {
 	return nil
 }
 
-// GetChatMessages возвращает сообщения конкретного чата с ограничением по количеству
 func GetChatMessages(db *sql.DB, chatName string, limit int) ([]Message, error) {
 	tableName := getTableName(chatName)
 
-	// Проверяем существование таблицы
 	var tableCnt int
 	err := db.QueryRow("SELECT count(*) FROM sqlite_master WHERE type='table' AND name=?", tableName).Scan(&tableCnt)
 	if err != nil {
 		return nil, fmt.Errorf("ошибка проверки таблицы: %w", err)
 	}
 
-	// Если таблица не существует, возвращаем пустой массив
 	if tableCnt == 0 {
 		return []Message{}, nil
 	}
@@ -95,7 +86,6 @@ func GetChatMessages(db *sql.DB, chatName string, limit int) ([]Message, error) 
 		messages = append(messages, msg)
 	}
 
-	// Разворачиваем слайс, чтобы сообщения шли в хронологическом порядке
 	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
 		messages[i], messages[j] = messages[j], messages[i]
 	}

@@ -49,9 +49,7 @@ func (c *Consumer) Close() {
 	}
 }
 
-// SubscribeToChats подписывается на все топики с паттерном "bunny.*"
 func (c *Consumer) SubscribeToChats() error {
-	// Создаем exchange
 	log.Printf("Создаем exchange bunny.chats")
 	err := c.channel.ExchangeDeclare(
 		"bunny.chats", // название exchange
@@ -67,7 +65,6 @@ func (c *Consumer) SubscribeToChats() error {
 	}
 	log.Printf("Exchange успешно создан")
 
-	// Создаем очередь с случайным именем
 	q, err := c.channel.QueueDeclare(
 		"",    // случайное имя
 		false, // не durable
@@ -81,7 +78,6 @@ func (c *Consumer) SubscribeToChats() error {
 	}
 	log.Printf("Создана очередь: %s", q.Name)
 
-	// Подписываемся на все топики с паттерном "bunny.*"
 	err = c.channel.QueueBind(
 		q.Name,        // имя очереди
 		"bunny.*",     // routing key
@@ -115,7 +111,6 @@ func (c *Consumer) SubscribeToChats() error {
 
 func (c *Consumer) handleMessages(msgs <-chan amqp.Delivery) {
 	for d := range msgs {
-		// Получаем название чата из routing key (например, "bunny.general" -> "general")
 		parts := strings.SplitN(d.RoutingKey, ".", 2)
 		if len(parts) != 2 {
 			log.Printf("Некорректный routing key: %s", d.RoutingKey)
@@ -130,14 +125,12 @@ func (c *Consumer) handleMessages(msgs <-chan amqp.Delivery) {
 			continue
 		}
 
-		// Если время не указано, используем текущее
 		if msg.Timestamp.IsZero() {
 			msg.Timestamp = time.Now()
 		}
 
 		log.Printf("Получено сообщение для чата %s от пользователя %s: %s", chatName, msg.Username, msg.Body)
 
-		// Сохраняем сообщение в базу
 		err = models.SaveMessage(c.db, chatName, &msg)
 		if err != nil {
 			log.Printf("Ошибка при сохранении сообщения: %v", err)
