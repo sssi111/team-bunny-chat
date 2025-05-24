@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"   # AMQP протокол
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - chat_data:/data
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - SQLITE_DB_PATH=/data/chat.db
+      - PORT=8080
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: on-failure:3
+
+volumes:
+  rabbitmq_data:
+  chat_data: 
