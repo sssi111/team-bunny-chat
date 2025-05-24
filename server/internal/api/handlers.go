@@ -19,7 +19,6 @@ func NewHandler(db *sql.DB) *Handler {
 	return &Handler{db: db}
 }
 
-// GetChatHistory обрабатывает запрос на получение истории сообщений чата
 func (h *Handler) GetChatHistory(c *gin.Context) {
 	log.Printf("=== Начало обработки запроса GetChatHistory ===")
 	chat := c.Query("chat")
@@ -42,7 +41,6 @@ func (h *Handler) GetChatHistory(c *gin.Context) {
 
 	log.Printf("Запрашиваем %d сообщений", limit)
 
-	// Проверяем подключение к базе данных
 	err = h.db.Ping()
 	if err != nil {
 		log.Printf("Ошибка проверки подключения к базе данных: %v", err)
@@ -51,7 +49,6 @@ func (h *Handler) GetChatHistory(c *gin.Context) {
 	}
 	log.Printf("Подключение к базе данных активно")
 
-	// Проверяем существование таблицы
 	var tableCnt int
 	err = h.db.QueryRow("SELECT count(*) FROM sqlite_master WHERE type='table' AND name=?", "chat_"+chat).Scan(&tableCnt)
 	if err != nil {
@@ -62,7 +59,6 @@ func (h *Handler) GetChatHistory(c *gin.Context) {
 	log.Printf("Найдено таблиц: %d", tableCnt)
 
 	if tableCnt > 0 {
-		// Проверяем количество сообщений
 		var msgCnt int
 		err = h.db.QueryRow("SELECT count(*) FROM chat_" + chat).Scan(&msgCnt)
 		if err != nil {
@@ -92,7 +88,6 @@ func (h *Handler) GetChatHistory(c *gin.Context) {
 	})
 }
 
-// SetupRoutes настраивает маршруты API
 func SetupRoutes(router *gin.Engine, handler *Handler) {
 	v1 := router.Group("/v1")
 	{

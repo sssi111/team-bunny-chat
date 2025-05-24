@@ -56,7 +56,6 @@ func TestCreateChatTable(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 
-				// Проверяем, что таблица существует
 				var tableName string
 				err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name=?",
 					getTableName(tt.chatName)).Scan(&tableName)
@@ -89,22 +88,18 @@ func TestSaveAndGetMessages(t *testing.T) {
 		},
 	}
 
-	// Сохраняем сообщения
 	for _, msg := range messages {
 		err := SaveMessage(db, chatName, &msg)
 		assert.NoError(t, err)
 	}
 
-	// Получаем сообщения
 	retrieved, err := GetChatMessages(db, chatName, 10)
 	assert.NoError(t, err)
 	assert.Len(t, retrieved, len(messages))
 
-	// Проверяем содержимое сообщений
 	for i, msg := range retrieved {
 		assert.Equal(t, messages[i].Username, msg.Username)
 		assert.Equal(t, messages[i].Body, msg.Body)
-		// Проверяем только дату, так как миллисекунды могут отличаться
 		assert.Equal(t, messages[i].Timestamp.Format("2006-01-02 15:04:05"),
 			msg.Timestamp.Format("2006-01-02 15:04:05"))
 	}
@@ -120,7 +115,6 @@ func TestGetChatMessagesLimit(t *testing.T) {
 
 	chatName := "test_chat"
 
-	// Сохраняем 5 сообщений
 	for i := 0; i < 5; i++ {
 		msg := &Message{
 			Username:  "user",

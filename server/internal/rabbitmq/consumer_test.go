@@ -35,7 +35,6 @@ func setupTestRabbitMQ(t *testing.T) (*amqp.Connection, *amqp.Channel, string) {
 	}
 
 	exchangeName := "test.exchange"
-	// Создаем exchange
 	err = ch.ExchangeDeclare(
 		exchangeName,
 		"topic",
@@ -68,7 +67,6 @@ func TestConsumerMessageHandling(t *testing.T) {
 	assert.NoError(t, err)
 	defer consumer.Close()
 
-	// Создаем очередь
 	q, err := ch.QueueDeclare(
 		"",
 		false,
@@ -79,7 +77,6 @@ func TestConsumerMessageHandling(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	// Привязываем очередь к exchange
 	err = ch.QueueBind(
 		q.Name,
 		"test.chat",
@@ -89,7 +86,6 @@ func TestConsumerMessageHandling(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	// Отправляем тестовое сообщение
 	testMessage := models.Message{
 		Username:  "test_user",
 		Body:      "Test message",
@@ -112,7 +108,6 @@ func TestConsumerMessageHandling(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	// Получаем сообщение
 	msgs, err := ch.Consume(
 		q.Name,
 		"",
@@ -149,10 +144,8 @@ func TestConsumerReconnection(t *testing.T) {
 	consumer, err := NewConsumer("amqp://guest:guest@localhost:5672/", db)
 	assert.NoError(t, err)
 
-	// Имитируем разрыв соединения
 	consumer.conn.Close()
 
-	// Пробуем переподключиться
 	newConn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	assert.NoError(t, err)
 	consumer.conn = newConn
@@ -161,6 +154,5 @@ func TestConsumerReconnection(t *testing.T) {
 	assert.NoError(t, err)
 	consumer.channel = newCh
 
-	// Проверяем, что можем создать новый канал
 	assert.NotNil(t, consumer.channel)
 }
