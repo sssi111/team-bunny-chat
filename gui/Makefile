@@ -5,7 +5,7 @@ BINARY_NAME=chat-gui
 GO=go
 
 # Цели
-.PHONY: all build run clean deps
+.PHONY: all build run clean deps test
 
 all: deps build
 
@@ -25,6 +25,14 @@ run:
 clean:
 	rm -f $(BINARY_NAME)
 	rm -rf fyne-cross
+
+# Запуск тестов
+test:
+	$(GO) test -v ./...
+
+# Запуск тестов в коротком режиме (без GUI тестов)
+test-short:
+	$(GO) test -v -short ./...
 
 # Сборка для разных платформ (требуется fyne-cross)
 .PHONY: cross-build
