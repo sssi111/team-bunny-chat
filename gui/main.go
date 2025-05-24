@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -63,6 +64,20 @@ type ChatApp struct {
 	queue   amqp.Queue
 }
 
+func getServerURL() string {
+	if server := os.Getenv("CHAT_SERVER"); server != "" {
+		return fmt.Sprintf("http://%s", server)
+	}
+	return fmt.Sprintf("http://%s", defaultServer)
+}
+
+func getRabbitMQURL() string {
+	if rabbitMQ := os.Getenv("CHAT_RABBITMQ"); rabbitMQ != "" {
+		return fmt.Sprintf("amqp://guest:guest@%s/", rabbitMQ)
+	}
+	return fmt.Sprintf("amqp://guest:guest@%s/", defaultRabbitMQ)
+}
+
 func NewChatApp() *ChatApp {
 	a := app.New()
 	a.Settings().SetTheme(theme.DarkTheme())
@@ -71,13 +86,13 @@ func NewChatApp() *ChatApp {
 	w.Resize(fyne.NewSize(800, 600))
 
 	chatApp := &ChatApp{
-		app:           a,
-		window:        w,
-		messages:      make([]Message, 0),
-		username:      os.Getenv("USER"),
+		app:            a,
+		window:         w,
+		messages:       make([]Message, 0),
+		username:       os.Getenv("USER"),
 		currentChannel: defaultChat,
-		serverURL:     fmt.Sprintf("http://%s", defaultServer),
-		rabbitMQURL:   fmt.Sprintf("amqp://guest:guest@%s/", defaultRabbitMQ),
+		serverURL:      getServerURL(),
+		rabbitMQURL:    getRabbitMQURL(),
 	}
 
 	chatApp.initUI()
@@ -328,6 +343,7 @@ func (c *ChatApp) connect() {
 				continue
 			}
 			
+			c.window.Canvas().Refresh(c.messageList)
 			c.addMessage(message)
 		}
 	}()
@@ -379,6 +395,7 @@ func (c *ChatApp) fetchHistory() {
 		}
 		
 		c.setStatus(fmt.Sprintf("Получено %d сообщений из истории", len(history.Messages)))
+		c.window.Canvas().Refresh(c.messageList)
 	}()
 }
 
@@ -463,24 +480,30 @@ func (c *ChatApp) sendMessage(text string) {
 }
 
 func (c *ChatApp) addMessage(msg Message) {
-	go func() {
-		c.messages = append(c.messages, msg)
-		
-		c.window.Canvas().Refresh(c.messageList)
-		c.messageList.Refresh()
-		c.messageList.ScrollToBottom()
-	}()
+	c.messages = append(c.messages, msg)
+	c.window.Canvas().Refresh(c.messageList)
+	c.messageList.Refresh()
+	c.messageList.ScrollToBottom()
 }
 
 func (c *ChatApp) setStatus(status string) {
-	go func() {
-		statusText := fmt.Sprintf("Статус: %s", status)
-		c.statusLabel.SetText(statusText)
-		c.window.Canvas().Refresh(c.statusLabel)
-	}()
+	statusText := fmt.Sprintf("Статус: %s", status)
+	c.statusLabel.SetText(statusText)
+	c.window.Canvas().Refresh(c.statusLabel)
 }
 
 func main() {
+	serverFlag := flag.String("server", "", "Server address (e.g., localhost:8080)")
+	rabbitMQFlag := flag.String("rabbitmq", "", "RabbitMQ address (e.g., localhost:5672)")
+	flag.Parse()
+
+	if *serverFlag != "" {
+		os.Setenv("CHAT_SERVER", *serverFlag)
+	}
+	if *rabbitMQFlag != "" {
+		os.Setenv("CHAT_RABBITMQ", *rabbitMQFlag)
+	}
+
 	chatApp := NewChatApp()
 	chatApp.Run()
 }
